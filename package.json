@@ -16,6 +16,7 @@
     "serve": "vite ."
   },
   "devDependencies": {
+    "@types/bun": "^1.1.13",
     "@types/node": "^20.8.7",
     "@typescript-eslint/eslint-plugin": "^5.20.0",
     "@typescript-eslint/parser": "^5.20.0",

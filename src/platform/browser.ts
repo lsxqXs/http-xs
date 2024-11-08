@@ -127,7 +127,7 @@ export async function fetchRequest<T = any>(opts: RequestInterface): Promise<Res
     }
   }
 
-  let timeoutId: NodeJS.Timeout = null;
+  let timeoutId:Timer = null;
 
   if (typeof opts.timeout === "number") {
     if (typeof cancelController === "undefined") {
@@ -159,7 +159,7 @@ export async function fetchRequest<T = any>(opts: RequestInterface): Promise<Res
     signal: cancelController?.signal
   });
 
-  let readBody;
+  let readBody : Response;
   return new Promise(async (resolve, reject) => {
 
     try {

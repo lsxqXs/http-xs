@@ -6,7 +6,8 @@ import type { XsHeaderImpl } from "./typedef";
  */
 export declare function toCamelCase(name: string): string;
 export type HeaderEntries = Record<string, string> | [string, string][] | XsHeaderImpl;
-export declare class XsHeaders extends URLSearchParams implements XsHeaderImpl {
+export declare class XsHeaders implements XsHeaderImpl {
+    private readonly urlSearchParams;
     constructor(init?: HeaderEntries);
     static forEach(init: HeaderEntries, each: (key: string, val: string) => void): void;
     static contentType: string;

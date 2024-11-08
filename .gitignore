@@ -11,3 +11,4 @@ src/*.js
 *.js.map
 *.lockb
 package-lock.json
+bun.lockb

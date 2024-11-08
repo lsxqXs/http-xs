@@ -98,13 +98,13 @@ function toCamelCase(name) {
     }
     return nextKey;
 }
-class XsHeaders extends URLSearchParams {
+class XsHeaders {
     constructor(init) {
         let initialize = {};
         XsHeaders.forEach(init, (k, v) => {
             initialize[k] = v;
         });
-        super(initialize);
+        this.urlSearchParams = new URLSearchParams(initialize);
     }
     static forEach(init, each) {
         if (isNil(init)) {
@@ -174,11 +174,17 @@ class XsHeaders extends URLSearchParams {
         nextHeader.append(XsHeaders.contentType, XsHeaders.type.text);
         return nextHeader;
     }
-    keys() {
-        return super.keys();
+    *keys() {
+        let ks = this.urlSearchParams.keys();
+        for (let k of ks) {
+            yield k;
+        }
     }
-    values() {
-        return super.values();
+    *values() {
+        let ks = this.urlSearchParams.values();
+        for (let k of ks) {
+            yield k;
+        }
     }
     empty() {
         return Array.from(this.keys()).length === 0;
@@ -196,29 +202,29 @@ class XsHeaders extends URLSearchParams {
     }
     raw() {
         let ans = {};
-        super.forEach(function each(val, key) {
+        this.urlSearchParams.forEach(function each(val, key) {
             ans[key] = val;
         });
         return ans;
     }
     get(name) {
-        let ans = super.get(toCamelCase(name));
+        let ans = this.urlSearchParams.get(toCamelCase(name));
         return ans !== null && ans !== void 0 ? ans : null;
     }
     set(name, value) {
-        return super.set(toCamelCase(name), value);
+        return this.urlSearchParams.set(toCamelCase(name), value);
     }
     append(name, value) {
-        return super.append(toCamelCase(name), value);
+        return this.urlSearchParams.append(toCamelCase(name), value);
     }
     has(name) {
-        return super.has(toCamelCase(name));
+        return this.urlSearchParams.has(toCamelCase(name));
     }
     delete(name) {
-        return super.delete(toCamelCase(name));
+        return this.urlSearchParams.delete(toCamelCase(name));
     }
     forEach(callbackfn, thisArg) {
-        return super.forEach(callbackfn, thisArg);
+        return this.urlSearchParams.forEach(callbackfn, thisArg);
     }
 }
 XsHeaders.contentType = "Content-Type";
@@ -507,27 +513,31 @@ function transfromResponse(responseStruct, responseType) {
             break;
         case "text":
         case "utf8":
+            if (isNodePlatform && Buffer.isBuffer(response)) {
+                response = response.toString("utf-8");
+                break;
+            }
         case "json":
             if (!isNodePlatform) {
                 break;
             }
-        /* eslint-disable no-fallthrough */
+            if (Buffer.isBuffer(response)) {
+                response = response.toString("utf-8");
+            }
+            try {
+                response = JSON.parse(response);
+                break;
+            }
+            catch (error) {
+                throw Error("responseType is not support");
+            }
         default: {
             const contentType = responseStruct.headers.get(XsHeaders.contentType);
             if (XsHeaders.isJSON(contentType) && typeof response === "string") {
                 response = JSON.parse(response);
             }
-            if (isNodePlatform) {
-                if (typeof response === "string" && (["text", "utf8"].includes(responseType) === false)) {
-                    try {
-                        response = JSON.parse(response);
-                        /* eslint-disable no-empty */
-                    }
-                    catch (err) { }
-                }
-                if (Buffer.isBuffer(response)) {
-                    response = response.toString("utf-8");
-                }
+            if (isNodePlatform && Buffer.isBuffer(response)) {
+                response = response.toString("utf-8");
             }
         }
     }
